@@ -1,0 +1,54 @@
+<section class="form">
+    <section mat-dialog-title>
+        <h1>Dodaj książkę</h1>
+    </section>
+    <section mat-dialog-content>
+        <form [formGroup]="form" class="row">
+            <mat-form-field appearance="outline">
+                <mat-label>Identyfikator ISBN</mat-label>
+                <input matInput 
+                type="text"
+                formControlName = "isbnNumber">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Tytuł</mat-label>
+                <input matInput
+                 type="text"
+                 formControlName = "title">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Autor</mat-label>
+                <input matInput
+                 type="text"
+                 formControlName = "author">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Liczba stron</mat-label>
+                <input matInput 
+                type="number"
+                formControlName = "numberOfPages">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Gatunek</mat-label>
+                <mat-select formControlName = "genre">
+                    <mat-option *ngFor="let genre of literaryGenre" [value]="genre.key">
+                        {{genre.value}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+            <mat-label>Data wydania</mat-label>
+            <input matInput 
+            [matDatepicker]="picker"
+            formControlName = "releaseDate">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+        </form>
+    </section>
+    <section mat-dialog-actions>
+        <button mat-raised-button (click)="cancelAddBookDialog()">Anuluj</button>
+        <button mat-raised-button color="primary" (click)="onSubmitForm()">Dodaj</button>
+    </section>
+
+</section>

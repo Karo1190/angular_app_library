@@ -1,0 +1,13 @@
+<ng-container >
+    <mat-toolbar color="primary">
+    <h1>Biblioteka</h1>
+    <span class="example-spacer"></span>
+    <button 
+    [routerLink]="['/addBook']" 
+    (click)="openAddBookDialog()" mat-raised-button color= "accent">
+  Dodaj książkę
+    </button>
+  </mat-toolbar>
+  <app-books-table></app-books-table>
+</ng-container>
+
