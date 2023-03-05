@@ -16,7 +16,6 @@ import { BooksService } from '../services/books.service';
 export class HomeComponent implements OnInit {
   @ViewChild(BooksTableComponent) templateTable!: BooksTableComponent;
   constructor(
-    private booksService: BooksService,
     private dialog: MatDialog,
     private booksApi: BooksApiService
   ) {}
@@ -24,14 +23,10 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {}
 
   openAddBookDialog() {
-    const dialogRef = this.dialog.open(AddBookComponent);
-    dialogRef.afterClosed().subscribe({
-      next: (val) => {
-        if (val) {
-          const test = this.booksApi.getBooks();
-          console.log(test);
-        }
-      },
-    });
+this.dialog.open(AddBookComponent,  {
+  data: {
+    mode: 'add'
+  },
+});
   }
 }

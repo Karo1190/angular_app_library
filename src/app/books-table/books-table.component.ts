@@ -1,16 +1,24 @@
 import {
   AfterViewInit,
   Component,
+  Inject,
   Input,
   OnInit,
   ViewChild,
 } from '@angular/core';
+import {
+  MatDialog,
+  MatDialogConfig,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { NgToastService } from 'ng-angular-popup';
 import { NgConfirmService } from 'ng-confirm-box';
 import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
+import { AddBookComponent } from '../add-book/add-book.component';
 import { BookDto } from '../models/dto';
 import { BooksApiService } from '../services/books-api.service';
 import { BooksService } from '../services/books.service';
@@ -21,7 +29,7 @@ import { BooksService } from '../services/books.service';
   styleUrls: ['./books-table.component.scss'],
 })
 export class BooksTableComponent implements OnInit {
-  dataSource!: MatTableDataSource<BookDto>
+  dataSource!: MatTableDataSource<BookDto>;
   displayedColumns: string[] = [
     'id',
     'isbnNumber',
@@ -38,10 +46,12 @@ export class BooksTableComponent implements OnInit {
 
   constructor(
     private booksApiService: BooksApiService,
-    private booksService: BooksService,
     private confirm: NgConfirmService,
-    private toast: NgToastService
+    private toast: NgToastService,
+    private bookService: BooksService,
+    private dialog: MatDialog
   ) {}
+  showData: any;
 
   ngOnInit(): void {
     this.getBooks();
@@ -76,15 +86,12 @@ export class BooksTableComponent implements OnInit {
     );
   }
 
-//przy próbie zaimplemnetowania metody z serwisu i jej wywwołania w komponencie znowu mam proble z aktualizacja widoku
-  // deleteBook(id: number){
-  //   this.booksService.deleteBook(id);
-  //   this.getBooks()
-  // }
-
-
-  editBook(id:number){
-
+  editBook(id: number): void {
+    this.dialog.open(AddBookComponent, {
+      data: {
+        id: id,
+        mode: 'edit'
+      },
+    });
   }
-
 }
