@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { FormGroup } from '@angular/forms';
+import {
+  MatDialog,
+  MatDialogConfig,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { NgToastService } from 'ng-angular-popup';
 import { NgConfirmService } from 'ng-confirm-box';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { AddBookComponent } from '../add-book/add-book.component';
 import { BookDto, BookRequest } from '../models/dto';
 import { BooksApiService } from './books-api.service';
@@ -13,12 +19,15 @@ import { BooksApiService } from './books-api.service';
 export class BooksService {
   book!: BookRequest;
   public books!: BookDto[];
+  bookId!: number;
 
   constructor(
     private booksApi: BooksApiService,
     private toastService: NgToastService,
     private dialogRef: MatDialogRef<AddBookComponent>,
     private confirm: NgConfirmService,
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) {}
 
   saveBookData(data: BookRequest) {
@@ -49,33 +58,52 @@ export class BooksService {
       },
     });
   }
-// getBooksData():Observable<BookDto[]> {
-//   return this.booksApi.getBooks()
-// }
 
-// delete(id: number){
-// this.confirm.
-// }
+  deleteBook(id: number) {
+    this.confirm.showConfirm(
+      'Czy na pewno chcesz usunąć książkę?',
+      () => {
+        this.booksApi.deleteBook(id).subscribe((res) => {
+          this.toastService.success({
+            detail: 'Success',
+            summary: 'Książka została usunięta',
+            duration: 3000,
+          });
+          this.booksApi.getBooks();
+        });
+      },
+      () => of({})
+    );
+  }
 
-deleteBook(id: number) {
-  this.confirm.showConfirm(
-    'Czy na pewno chcesz usunąć książkę?',
-    () => {
-      this.booksApi.deleteBook(id).subscribe((res) => {
+  getParamId(): number {
+    this.route.params.subscribe((params) => {
+      this.bookId = params['id'];
+    });
+    return this.bookId;
+  }
+
+  updateBookData(id: number, bookDetails: BookDto) {
+    this.booksApi.updateBook(id, bookDetails).subscribe({
+      next: (res) => {
+        if (res) bookDetails = res;
         this.toastService.success({
           detail: 'Success',
-          summary: 'Książka została usunięta',
+          summary: 'Książka zapisana pomyślnie',
           duration: 3000,
         });
-        this.getBooks();
-      });
-    },
-    () => {}
-  );
-}
+      },
+      error: () => {
+        this.toastService.error({
+          detail: 'Failed',
+          summary: 'Książka nie została zapisana',
+          duration: 3000,
+        });
+      },
+    });
+  }
 
-getBooks(){
-  return this.booksApi.getBooks()
-}
-
+  // getBooksData(){
+  //   this.booksApi.getBooks()
+  // }
 }

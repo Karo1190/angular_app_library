@@ -1,6 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, Inject, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { LiteraryGenre } from '../dictionary';
 import { BookDto } from '../models/dto';
@@ -22,39 +27,71 @@ export class AddBookComponent implements OnInit {
   ];
 
   form!: FormGroup;
-  book!: BookDto;
+  bookId!: number;
+  mode!: string;
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AddBookComponent>,
     private booksService: BooksService,
     private router: Router,
-    private booksApiService: BooksApiService
+    private booksApiService: BooksApiService,
 
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      id: number;
+      mode: string;
+    },
+    private dialogRef: MatDialogRef<AddBookComponent>
   ) {}
 
   ngOnInit(): void {
-   this.createForm();
+    this.editOrAddMode();
   }
 
   onSubmitForm(): void {
     if (this.form.valid) {
       this.booksService.saveBookData(this.form.value);
-      this.cancelAddBookDialog()
-      this.router.navigate(['/home'])
+      this.closeDialog();
     }
   }
-  cancelAddBookDialog(): void {
+  closeDialog(): void {
+    this.dialogRef.afterClosed().subscribe((resp) => {
+      this.booksApiService.getBooks();
+    });
+    this.router.navigate(['/bookList']);
     this.dialogRef.close();
   }
 
-  createForm(){
+  createForm() {
     this.form = this.fb.group({
       isbnNumber: new FormControl('', Validators.required),
-      title: new FormControl('',Validators.required),
+      title: new FormControl('', Validators.required),
       author: new FormControl('', Validators.required),
       numberOfPages: new FormControl('', Validators.required),
       releaseDate: new FormControl('', Validators.required),
       genre: new FormControl('', Validators.required),
     });
+  }
+
+  fetchDataFromResponse(id: number) {
+    if(id != undefined){
+      this.booksApiService.getBook(id).subscribe((resp) => {
+        this.form.patchValue(resp);
+      });
+    }
+
+  }
+
+  updateBookData() {
+    this.booksService.updateBookData(this.data.id, this.form.value);
+    this.closeDialog();
+  }
+
+  editOrAddMode() {
+    if (this.data.id == undefined && this.mode === 'add') {
+      this.createForm();
+    } else {
+      this.createForm();
+      this.fetchDataFromResponse(this.data.id);
+    }
   }
 }
